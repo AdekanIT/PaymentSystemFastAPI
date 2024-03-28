@@ -38,6 +38,25 @@ def get_history_transaction_db(card_from_number):
         return 'History empty'
 
 
+def cancel_transaction_db(card_from_number, card_to_number, amount, tr_id):
+    db = next(get_db())
+    checker_card_from = validate_card(card_from_number, db)
+    checker_card_to = validate_card(card_to_number, db)
+    if checker_card_from and checker_card_to:
+        transaction_to_cancel = db.query(Transaction).filter_by(tr_id=tr_id).first()
+        if transaction_to_cancel:
+            checker_card_from.balance += amount
+            checker_card_to.balance -= amount
+            transaction_to_cancel.status = False
+
+            db.delete(transaction_to_cancel)
+            db.commit()
+
+            return 'Transaction canceled'
+        else:
+            return 'Transaction successfully done!'
+    else:
+        return 'One of the card not exist'
 
 
 
